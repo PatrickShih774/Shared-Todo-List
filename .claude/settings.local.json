@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node server.js)",
+      "Bash(curl -s -c /tmp/cookies http://localhost:3000/api/login -H \"Content-Type: application/json\" -d '{\"username\":\"Boss\"}')",
+      "Bash(curl -s -b /tmp/cookies http://localhost:3000/api/me)",
+      "Bash(curl -s -b /tmp/cookies http://localhost:3000/api/users)",
+      "Bash(curl -s -b /tmp/cookies http://localhost:3000/api/todos -H \"Content-Type: application/json\" -d '{\"title\":\"开会准备材料\",\"description\":\"准备季度汇报PPT\",\"priority\":\"high\",\"due_date\":\"2026-07-05\",\"assigned_to\":2}')",
+      "Bash(curl -s -b /tmp/cookies http://localhost:3000/api/todos/1 -H \"Content-Type: application/json\" -d '{\"completed\":true,\"priority\":\"medium\"}')",
+      "Bash(curl -s -b /tmp/cookies \"http://localhost:3000/api/todos?filter=completed\")",
+      "Bash(curl -s -b /tmp/cookies -X DELETE http://localhost:3000/api/todos/1)",
+      "Bash(curl -s -b /tmp/cookies -X POST http://localhost:3000/api/logout)",
+      "Bash(curl -s -b /tmp/cookies http://localhost:3000/api/todos -H \"Content-Type: application/json\" -d '{\"title\":\"测试事项\",\"priority\":\"high\",\"due_date\":\"2026-07-10\"}')",
+      "Bash(curl -s -b /tmp/cookies -X PUT http://localhost:3000/api/todos/1 -H \"Content-Type: application/json\" -d '{\"completed\":true,\"priority\":\"medium\"}')"
+    ]
+  }
+}

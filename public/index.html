@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Shared Todo List</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- ===== Login Screen ===== -->
+  <div id="login-screen" class="screen">
+    <div class="login-container">
+      <h1>📋 Shared Todo List</h1>
+      <p>选择你的身份</p>
+      <div class="user-select-buttons">
+        <button class="user-btn" data-username="Boss">👔 老板 (Boss)</button>
+        <button class="user-btn" data-username="Assistant1">🧑‍💼 助理 1</button>
+        <button class="user-btn" data-username="Assistant2">🧑‍💼 助理 2</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== App Screen ===== -->
+  <div id="app-screen" class="screen" style="display:none">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>📋 待办清单</h1>
+      <div class="header-right">
+        <div id="online-indicator" class="online-indicator"></div>
+        <div class="user-badge">
+          <span id="current-username"></span>
+          <button id="logout-btn" class="btn-text">退出</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Add Form -->
+      <form id="todo-form" class="todo-form">
+        <div class="form-row">
+          <input type="text" id="todo-title" placeholder="添加新的待办事项..." required autocomplete="off">
+          <button type="submit" class="btn-primary">添加</button>
+        </div>
+        <div class="form-row form-extras" id="form-extras">
+          <textarea id="todo-description" placeholder="备注（可选）" rows="2"></textarea>
+        </div>
+        <div class="form-row form-extras" id="form-extras2">
+          <select id="todo-priority">
+            <option value="q4">🟢 不重要不紧急 (Q4)</option>
+            <option value="q3">🟡 不重要但紧急 (Q3)</option>
+            <option value="q2">🔵 重要不紧急 (Q2)</option>
+            <option value="q1">🔴 重要且紧急 (Q1)</option>
+          </select>
+          <input type="date" id="todo-due-date">
+          <select id="todo-assignee">
+            <option value="">指派给...</option>
+          </select>
+        </div>
+      </form>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="active">进行中</button>
+        <button class="filter-btn" data-filter="completed">已完成</button>
+      </div>
+
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button class="view-btn" data-view="list">📋 列表视图</button>
+        <button class="view-btn active" data-view="quadrant">🎯 象限视图</button>
+      </div>
+
+      <!-- Todo List (list view) -->
+      <ul id="todo-list" class="todo-list">
+        <li class="empty-state">暂无待办事项</li>
+      </ul>
+
+      <!-- Quadrant View -->
+      <div id="quadrant-view" class="quadrant-view" style="display:none">
+        <div class="quadrant-grid">
+          <div class="quadrant q1">
+            <div class="quadrant-header">
+              <span class="quadrant-icon">🔴</span>
+              <span class="quadrant-title">重要且紧急</span>
+              <span class="quadrant-sub">立即去做</span>
+            </div>
+            <ul class="quadrant-list" data-quadrant="1"></ul>
+          </div>
+          <div class="quadrant q2">
+            <div class="quadrant-header">
+              <span class="quadrant-icon">🔵</span>
+              <span class="quadrant-title">重要不紧急</span>
+              <span class="quadrant-sub">计划去做</span>
+            </div>
+            <ul class="quadrant-list" data-quadrant="2"></ul>
+          </div>
+          <div class="quadrant q3">
+            <div class="quadrant-header">
+              <span class="quadrant-icon">🟡</span>
+              <span class="quadrant-title">不重要但紧急</span>
+              <span class="quadrant-sub">委托去做</span>
+            </div>
+            <ul class="quadrant-list" data-quadrant="3"></ul>
+          </div>
+          <div class="quadrant q4">
+            <div class="quadrant-header">
+              <span class="quadrant-icon">🟢</span>
+              <span class="quadrant-title">不重要不紧急</span>
+              <span class="quadrant-sub">尽量不做</span>
+            </div>
+            <ul class="quadrant-list" data-quadrant="4"></ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span id="items-count">共 0 项</span>
+    </footer>
+  </div>
+
+  <!-- ===== Edit Modal ===== -->
+  <div id="edit-modal" class="modal-overlay" style="display:none">
+    <div class="modal-content">
+      <h2>编辑待办</h2>
+      <form id="edit-form">
+        <label>
+          标题
+          <input type="text" id="edit-title" required>
+        </label>
+        <label>
+          备注
+          <textarea id="edit-description" rows="3"></textarea>
+        </label>
+        <label>
+          象限
+          <select id="edit-priority">
+            <option value="q4">🟢 不重要不紧急 (Q4)</option>
+            <option value="q3">🟡 不重要但紧急 (Q3)</option>
+            <option value="q2">🔵 重要不紧急 (Q2)</option>
+            <option value="q1">🔴 重要且紧急 (Q1)</option>
+          </select>
+        </label>
+        <label>
+          截止日期
+          <input type="date" id="edit-due-date">
+        </label>
+        <label>
+          指派给
+          <select id="edit-assignee">
+            <option value="">不指派</option>
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">保存</button>
+          <button type="button" id="edit-cancel-btn" class="btn-secondary">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
