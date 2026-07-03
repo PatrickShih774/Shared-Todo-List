@@ -167,3 +167,13 @@ Todo_claude/
 11. 切换回"列表视图" → 列表显示 🔴🔵🟡🟢 象限徽章
 12. 编辑待办 → 可重新选择象限，保存后列表和象限视图同步更新
 13. 旧数据（之前创建的 high/medium/low）→ 自动映射为 q1/q3/q4
+
+---
+
+## 🎉 纪念
+
+首次 Vibecoding 完成，记录一下消耗的费用：
+
+![Vibecoding 费用](assets/vibcoding-cost.png)
+
+> 全程 AI 辅助编码（Claude Code），从需求到上线零手写代码。
