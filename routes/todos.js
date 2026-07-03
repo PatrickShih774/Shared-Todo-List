@@ -89,12 +89,25 @@ router.put('/todos/:id', requireAuth, (req, res) => {
   const db = getDb();
   const { id } = req.params;
 
-  const existing = db.prepare('SELECT id FROM todos WHERE id = ?').get(id);
+  const existing = db.prepare('SELECT id, created_by, assigned_to FROM todos WHERE id = ?').get(id);
   if (!existing) {
     return res.status(404).json({ error: 'Todo not found' });
   }
 
   const { title, description, priority, due_date, completed, assigned_to } = req.body;
+
+  // 权限校验：编辑非 completed 字段 → 仅创建者
+  const isEditingContent = title !== undefined || description !== undefined ||
+                           priority !== undefined || due_date !== undefined ||
+                           assigned_to !== undefined;
+  if (isEditingContent && existing.created_by !== req.session.userId) {
+    return res.status(403).json({ error: '只有发布者才能编辑' });
+  }
+
+  // 权限校验：标记完成 → 仅被指派者（未指派则允许）
+  if (completed !== undefined && existing.assigned_to && existing.assigned_to !== req.session.userId) {
+    return res.status(403).json({ error: '只有被指派者才能标记完成' });
+  }
   const updates = [];
   const values = [];
 
@@ -149,9 +162,14 @@ router.delete('/todos/:id', requireAuth, (req, res) => {
   const db = getDb();
   const { id } = req.params;
 
-  const existing = db.prepare('SELECT id FROM todos WHERE id = ?').get(id);
+  const existing = db.prepare('SELECT id, created_by FROM todos WHERE id = ?').get(id);
   if (!existing) {
     return res.status(404).json({ error: 'Todo not found' });
+  }
+
+  // 权限校验：仅创建者可删除
+  if (existing.created_by !== req.session.userId) {
+    return res.status(403).json({ error: '只有发布者才能删除' });
   }
 
   db.prepare('DELETE FROM todos WHERE id = ?').run(id);

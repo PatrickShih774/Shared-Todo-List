@@ -174,9 +174,14 @@ function renderTodoItem(t) {
   const qClass = `${t.priority}-badge`;
   const qLabel = quadrantIcons[t.priority] + ' ' + (quadrantLabels[t.priority] || '');
 
+  // 权限判断
+  const isCreator = state.currentUser && t.created_by && t.created_by.id === state.currentUser.id;
+  const isAssignee = state.currentUser && t.assigned_to && t.assigned_to.id === state.currentUser.id;
+  const canCheckComplete = t.assigned_to ? isAssignee : !!state.currentUser;
+
   return `
     <li class="todo-item ${t.completed ? 'completed' : ''}" data-id="${t.id}">
-      <input type="checkbox" class="todo-checkbox" ${t.completed ? 'checked' : ''}>
+      <input type="checkbox" class="todo-checkbox" ${t.completed ? 'checked' : ''} ${canCheckComplete ? '' : 'disabled'}>
       <div class="todo-content">
         <div class="todo-title">${escapeHtml(t.title)}</div>
         ${t.description ? `<div class="todo-description">${escapeHtml(t.description)}</div>` : ''}
@@ -188,10 +193,11 @@ function renderTodoItem(t) {
           <span>${relativeTime(t.created_at)}</span>
         </div>
       </div>
+      ${isCreator ? `
       <div class="todo-actions">
         <button class="btn-edit" data-action="edit">编辑</button>
         <button class="btn-delete" data-action="delete">删除</button>
-      </div>
+      </div>` : ''}
     </li>
   `;
 }
@@ -237,23 +243,30 @@ function renderQuadrantItem(t) {
   const isOverdue = t.due_date && !t.completed && t.due_date < new Date().toISOString().split('T')[0];
   const today = new Date().toISOString().split('T')[0];
   const isNearDue = t.due_date && !t.completed && t.due_date >= today && t.due_date <= new Date(Date.now() + 3*86400000).toISOString().split('T')[0];
-  const showMeta = isOverdue || isNearDue || t.assigned_to;
+  // const showMeta = isOverdue || isNearDue || t.assigned_to;
+
+  // 权限判断
+  const isCreator = state.currentUser && t.created_by && t.created_by.id === state.currentUser.id;
+  const isAssignee = state.currentUser && t.assigned_to && t.assigned_to.id === state.currentUser.id;
+  const canCheckComplete = t.assigned_to ? isAssignee : !!state.currentUser;
 
   return `
     <li class="quadrant-todo ${t.completed ? 'completed' : ''}" data-id="${t.id}">
-      <input type="checkbox" class="quadrant-todo-checkbox" ${t.completed ? 'checked' : ''}>
+      <input type="checkbox" class="quadrant-todo-checkbox" ${t.completed ? 'checked' : ''} ${canCheckComplete ? '' : 'disabled'}>
       <div class="quadrant-todo-content">
         <div class="quadrant-todo-title">${escapeHtml(t.title)}</div>
-        ${showMeta ? `<div class="quadrant-todo-meta">
+        <div class="quadrant-todo-meta">
+          <span>👤 ${escapeHtml(t.created_by.username)}</span>
+          ${t.assigned_to ? `<span>→ ${escapeHtml(t.assigned_to.username)}</span>` : ''}
           ${isOverdue ? '<span style="color:var(--danger)">⚠️ 已逾期</span>' : ''}
-          ${isNearDue ? '📅 即将到期' : ''}
-          ${t.assigned_to ? `→ ${escapeHtml(t.assigned_to.username)}` : ''}
-        </div>` : ''}
+          ${isNearDue ? '<span>📅 即将到期</span>' : ''}
+        </div>
       </div>
+      ${isCreator ? `
       <div class="quadrant-todo-actions">
         <button class="btn-edit-q" data-action="edit" title="编辑">✏️</button>
         <button class="btn-delete-q" data-action="delete" title="删除">🗑️</button>
-      </div>
+      </div>` : ''}
     </li>
   `;
 }
@@ -343,6 +356,13 @@ async function handleDeleteTodo(id) {
 function handleEditTodo(id) {
   const todo = state.todos.find(t => t.id === id);
   if (!todo) return;
+
+  // 权限校验
+  if (todo.created_by.id !== state.currentUser.id) {
+    showToast('只有发布者才能编辑', 'error');
+    return;
+  }
+
   editingTodoId = id;
   editTitle.value = todo.title;
   editDescription.value = todo.description || '';

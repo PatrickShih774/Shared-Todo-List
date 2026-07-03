@@ -499,6 +499,12 @@ html, body {
   flex-shrink: 0;
 }
 
+.todo-checkbox:disabled,
+.quadrant-todo-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 .todo-content {
   flex: 1;
   min-width: 0;
